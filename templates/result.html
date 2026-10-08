@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Defect Classification Result | SteelDefect AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header>
+        <div class="nav-container">
+            <a href="/" class="brand">
+                <div class="brand-icon">S</div>
+                <span>SteelDefect AI</span>
+            </a>
+            <span class="badge-tag">Prediction Result</span>
+        </div>
+    </header>
+
+    <main>
+        <div class="card">
+            <div class="result-grid">
+                
+                <!-- Uploaded Image Display -->
+                <div class="image-preview-card">
+                    <img src="{{ image_url }}" alt="Uploaded Steel Image" class="uploaded-image">
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">
+                        <strong>Filename:</strong> {{ filename }}
+                    </div>
+                </div>
+
+                <!-- Prediction Output Details -->
+                <div class="prediction-details">
+                    
+                    <div class="prediction-highlight">
+                        <div class="label-title">Predicted Defect Class</div>
+                        <div class="predicted-name">{{ predicted_class }}</div>
+                        
+                        <div class="confidence-value">
+                            <span>Confidence Score</span>
+                            <span>{{ confidence }}%</span>
+                        </div>
+                        <div class="confidence-bar-wrapper">
+                            <div class="confidence-fill" style="width: {{ confidence }}%;"></div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 1.5rem;">
+                        <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--text-main);">
+                            Defect Characteristics & Description:
+                        </h4>
+                        <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5;">
+                            {{ description }}
+                        </p>
+                    </div>
+
+                    <!-- All Class Probabilities Breakdown -->
+                    <div class="prob-list">
+                        <h4 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--text-muted);">
+                            Class Probability Breakdown:
+                        </h4>
+                        {% for item in probabilities %}
+                            <div class="prob-item">
+                                <div class="prob-header">
+                                    <span>{{ item.class_name }}</span>
+                                    <span>{{ item.probability }}%</span>
+                                </div>
+                                <div class="prob-bar">
+                                    <div class="prob-fill" style="width: {{ item.probability }}%;"></div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <a href="/" class="btn-back">
+                        <span>←</span> Classify Another Image
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>Steel Surface Defect Classification System • Powered by TensorFlow & Flask</p>
+    </footer>
+
+</body>
+</html>

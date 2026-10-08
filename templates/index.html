@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steel Surface Defect Classification | AI Deployment</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header>
+        <div class="nav-container">
+            <a href="/" class="brand">
+                <div class="brand-icon">S</div>
+                <span>SteelDefect AI</span>
+            </a>
+            <span class="badge-tag">CNN Classification Model</span>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h1>Steel Surface Defect Classification</h1>
+            <p>Upload a surface image of hot-rolled steel strip to identify defect types using deep learning.</p>
+        </section>
+
+        <!-- Flash messages for validation errors -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'error' else 'error' }}">
+                        <span>⚠️</span>
+                        <div>{{ message }}</div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Model Status Warning -->
+        {% if not model_loaded %}
+            <div class="alert alert-warning">
+                <span>⚡</span>
+                <div>
+                    <strong>Model File Missing:</strong> Please place your trained Keras model file 
+                    <code>trained_model.keras</code> or <code>product_defect_cnn_model.h5</code> inside the 
+                    <code>model/</code> folder to enable predictions.
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="card">
+            <form action="/predict" method="POST" enctype="multipart/form-data" id="uploadForm">
+                <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+                    <div class="upload-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                        </svg>
+                    </div>
+                    <div class="upload-title">Click to upload or drag & drop image</div>
+                    <div class="upload-sub">Supports JPG, JPEG, PNG, BMP (Resized to 200×200 automatically)</div>
+                    <div class="btn-select">Browse Image</div>
+                    <input type="file" name="file" id="fileInput" class="file-input" accept=".jpg,.jpeg,.png,.bmp" required onchange="handleFileSelect(this)">
+                </div>
+
+                <div class="preview-container" id="previewContainer">
+                    <img id="imagePreview" class="preview-img" src="" alt="Selected Preview">
+                    <div class="file-name-display" id="fileNameDisplay"></div>
+                </div>
+
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    🔍 Classify Defect
+                </button>
+            </form>
+        </div>
+
+        <section class="classes-section">
+            <h3 class="section-title">
+                <span>🛡️</span> Detectable Defect Classes (NEU Surface Defect Database)
+            </h3>
+            <div class="class-grid">
+                <div class="class-card">
+                    <span class="class-chip">Cr</span>
+                    <div class="class-info">
+                        <h4>Crazing</h4>
+                        <p>Fine micro-crack networks on metal surface.</p>
+                    </div>
+                </div>
+                <div class="class-card">
+                    <span class="class-chip">In</span>
+                    <div class="class-info">
+                        <h4>Inclusion</h4>
+                        <p>Entrapped non-metallic impurities in steel matrix.</p>
+                    </div>
+                </div>
+                <div class="class-card">
+                    <span class="class-chip">Pa</span>
+                    <div class="class-info">
+                        <h4>Patches</h4>
+                        <p>Irregular localized discoloration or surface patches.</p>
+                    </div>
+                </div>
+                <div class="class-card">
+                    <span class="class-chip">PS</span>
+                    <div class="class-info">
+                        <h4>Pitted Surface</h4>
+                        <p>Small cavity depressions formed by oxidation/corrosion.</p>
+                    </div>
+                </div>
+                <div class="class-card">
+                    <span class="class-chip">RS</span>
+                    <div class="class-info">
+                        <h4>Rolled-in Scale</h4>
+                        <p>Oxide scale pressed into surface during hot rolling.</p>
+                    </div>
+                </div>
+                <div class="class-card">
+                    <span class="class-chip">Sc</span>
+                    <div class="class-info">
+                        <h4>Scratches</h4>
+                        <p>Linear surface abrasions or mechanical friction marks.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Steel Surface Defect Classification System • Powered by TensorFlow & Flask</p>
+    </footer>
+
+    <script>
+        function handleFileSelect(input) {
+            const previewContainer = document.getElementById('previewContainer');
+            const previewImg = document.getElementById('imagePreview');
+            const fileNameDisplay = document.getElementById('fileNameDisplay');
+            
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    fileNameDisplay.textContent = `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                    previewContainer.style.display = 'block';
+                }
+
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Drag and drop setup
+        const uploadZone = document.getElementById('uploadZone');
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('dragover');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+            }, false);
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            const fileInput = document.getElementById('fileInput');
+
+            if (files && files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect(fileInput);
+            }
+        });
+    </script>
+</body>
+</html>
